@@ -20,7 +20,14 @@
     }
     h4 { margin-bottom: 5px; }
     .res { font-weight: bold; margin-top: 8px; }
-    .hist { font-size: 13px; color: #555; margin-top: 4px; }
+    .hist {
+      font-size: 13px;
+      color: #444;
+      margin-top: 6px;
+      background: #f7f7f7;
+      padding: 6px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -94,9 +101,11 @@ function getKey(nome) {
 function carregar() {
   const t = document.getElementById("treino").value;
   let html = "";
+
   treinos[t].forEach((e,i)=>{
     const hist = JSON.parse(localStorage.getItem(getKey(e[0])) || "null");
     const ultimaCarga = hist ? hist.carga : "";
+    const ultimaDecisao = hist ? hist.decisao : null;
 
     html += `
     <div class="box">
@@ -118,9 +127,17 @@ function carregar() {
       </button>
 
       <div class="res" id="res${i}"></div>
-      ${hist ? `<div class="hist">Última sessão: ${hist.carga} kg</div>` : ""}
+
+      ${hist ? `
+        <div class="hist">
+          Última carga: <b>${hist.carga} kg</b><br>
+          Última decisão: <b>${hist.decisao}</b><br>
+          Data: ${hist.data}
+        </div>
+      ` : ""}
     </div>`;
   });
+
   document.getElementById("exercicios").innerHTML = html;
 }
 
@@ -130,24 +147,25 @@ function avaliar(i,nome,min,max,s) {
   let rir=Number(document.getElementById(`rir${i}`).value);
   let carga=Number(document.getElementById(`c${i}`).value);
 
-  let resultado = `➡ Manter ${carga} kg e buscar +1 rep`;
+  let decisao = `➡ Manter ${carga} kg e buscar +1 rep`;
 
   if (Math.min(...reps)>=max && rir<=1) {
     let novaCarga = (carga * 1.02).toFixed(1);
-    resultado = `🔼 Aumentar carga → ${novaCarga} kg (+2%)`;
+    decisao = `🔼 Aumentar carga → ${novaCarga} kg (+2%)`;
   }
 
   if (Math.min(...reps)<min) {
     let novaCarga = (carga * 0.95).toFixed(1);
-    resultado = `🔽 Reduzir carga → ${novaCarga} kg (−5%)`;
+    decisao = `🔽 Reduzir carga → ${novaCarga} kg (−5%)`;
   }
 
   localStorage.setItem(getKey(nome), JSON.stringify({
     carga: carga,
+    decisao: decisao,
     data: new Date().toLocaleDateString()
   }));
 
-  document.getElementById("res"+i).innerText = resultado;
+  document.getElementById("res"+i).innerText = decisao;
 }
 </script>
 
